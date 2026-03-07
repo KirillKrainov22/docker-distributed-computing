@@ -1,0 +1,25 @@
+version: "3.8" # создаём виртуальную сеть — все контейнеры в ней видят друг друга
+
+networks:
+  lab4net:
+
+services:
+  redis:
+    image: redis:7-alpine   # берём готовый образ Redis из Docker Hub
+    networks: [lab4net]     # подключаем в нашу сеть
+    mem_limit: 128m         # максимум 128 мегабайт памяти
+
+  producer:
+    build: ./producer       # собираем образ из папки producer (там Dockerfile)
+    depends_on: [redis]     # стартует только после того как redis поднялся
+    networks: [lab4net]
+    mem_limit: 64m
+    env_file: .env          # передаём переменные из .env внутрь контейнера
+
+  consumer:
+    build: ./consumer
+    depends_on: [redis]
+    networks: [lab4net]
+    mem_limit: 128m
+    env_file: .env
+    #количество задаётся через --scale при запуске
